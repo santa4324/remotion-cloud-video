@@ -94,7 +94,7 @@ export const StackShieldVideo: React.FC = () => {
 			<Scene startFrame={180} endFrame={270}>
 				<AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
 					<div style={{
-						fontSize: 120,
+						fontSize: 150,
 						...TEXT_STYLE,
 						color: COLORS.primary,
 						transform: `scale(${spring({ frame: frame - 180, fps, config: { damping: 10 } })})`,
@@ -111,7 +111,7 @@ export const StackShieldVideo: React.FC = () => {
 				<AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
 					<div style={{
 						display: 'grid',
-						gridTemplateColumns: 'repeat(3, 1fr)',
+						gridTemplateColumns: '1fr',
 						gap: '50px',
 						width: '80%',
 						opacity: interpolate(frame, [270, 290], [0, 1], { extrapolateRight: 'clamp' })
