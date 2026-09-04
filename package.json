@@ -2,12 +2,12 @@
   "name": "remotion-cloud-video",
   "version": "1.0.0",
   "description": "Remotion video rendered on GitHub Actions",
-  "main": "src/Root.tsx",
+  "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "start": "remotion studio src/Root.tsx",
-    "build": "remotion bundle src/Root.tsx out",
-    "render": "mkdir -p out && remotion render src/Root.tsx MyVideo out/video.mp4"
+    "start": "remotion studio src/index.ts",
+    "build": "remotion bundle src/index.ts out",
+    "render": "mkdir -p out && remotion render src/index.ts MyVideo out/video.mp4"
   },
   "dependencies": {
     "remotion": "latest",
