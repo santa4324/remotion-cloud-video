@@ -1,0 +1,25 @@
+{
+  "name": "remotion-cloud-video",
+  "version": "1.0.0",
+  "description": "Remotion video rendered on GitHub Actions",
+  "main": "src/Root.tsx",
+  "type": "module",
+  "scripts": {
+    "start": "remotion studio src/Root.tsx",
+    "build": "remotion bundle src/Root.tsx out",
+    "render": "remotion render src/Root.tsx MyVideo out/video.mp4"
+  },
+  "dependencies": {
+    "remotion": "latest",
+    "@remotion/cli": "latest",
+    "@remotion/renderer": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "ts-node": "latest"
+  }
+}
