@@ -7,7 +7,7 @@
   "scripts": {
     "start": "remotion studio src/index.ts",
     "build": "remotion bundle src/index.ts out",
-    "render": "mkdir -p out && remotion render src/index.ts MyVideo out/video.mp4"
+    "render": "mkdir -p out && remotion render src/index.ts StackShieldVideo out/video.mp4"
   },
   "dependencies": {
     "remotion": "latest",
