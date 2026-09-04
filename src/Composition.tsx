@@ -69,7 +69,7 @@ export const StackShieldVideo: React.FC = () => {
 				<AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
 					<FadeInText text="You're shipping at light speed..." size={70} />
 					<div style={{ height: 100 }} />
-					<FadeInText text="But is your security keeping up?" size={60, color: COLORS.primary} delay={30} />
+					<FadeInText text="But is your security keeping up?" size={60} color={COLORS.primary} delay={30} />
 				</AbsoluteFill>
 			</Scene>
 
