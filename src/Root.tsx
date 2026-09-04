@@ -1,14 +1,14 @@
 import React from 'react';
 import { Composition } from 'remotion';
-import { MyVideo } from './Composition';
+import { StackShieldVideo } from './Composition';
 
 export const RemotionRoot: React.FC = () => {
 	return (
 		<>
 			<Composition
-				id="MyVideo"
-				component={MyVideo}
-				durationInFrames={150}
+				id="StackShieldVideo"
+				component={StackShieldVideo}
+				durationInFrames={600}
 				fps={30}
 				width={1920}
 				height={1080}
