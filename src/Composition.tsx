@@ -4,187 +4,294 @@ import {
 	interpolate,
 	useCurrentFrame,
 	useVideoConfig,
-	spring
+	spring,
 } from 'remotion';
 
-// --- Styles ---
+// --- Constants & Theme ---
 const COLORS = {
-	bg: '#0a0a0f',
+	bg: '#050508',
 	primary: '#00d2ff',
 	secondary: '#9d50bb',
+	accent: '#00ff88',
 	text: '#ffffff',
-	danger: '#ff4d4d',
-	success: '#00ff88'
+	glass: 'rgba(255, 255, 255, 0.05)',
+	glassBorder: 'rgba(255, 255, 255, 0.1)',
 };
 
 const TEXT_STYLE: React.CSSProperties = {
 	color: COLORS.text,
-	fontFamily: 'Inter, system-ui, sans-serif',
+	fontFamily: '"Plus Jakarta Sans", "Inter", system-ui, sans-serif',
 	textAlign: 'center',
 	fontWeight: 'bold',
 };
 
-// --- Components ---
+// --- Premium Components ---
 
-const Scene: React.FC<{
-	startFrame: number;
-	endFrame: number;
-	children: React.ReactNode
-}> = ({ startFrame, endFrame, children }) => {
+const MeshBackground: React.FC = () => {
 	const frame = useCurrentFrame();
-	if (frame < startFrame || frame > endFrame) return null;
-	return <AbsoluteFill>{children}</AbsoluteFill>;
-};
+	const { fps } = useVideoConfig();
 
-const FadeInText: React.FC<{
-	text: string;
-	size?: number;
-	color?: string;
-	delay?: number;
-}> = ({ text, size = 80, color = COLORS.text, delay = 0 }) => {
-	const frame = useCurrentFrame();
-	const opacity = interpolate(frame - delay, [0, 20], [0, 1], { extrapolateRight: 'clamp' });
+	const move1 = spring({ frame, fps, config: { damping: 20 } });
+	const move2 = spring({ frame: frame * 0.8, fps, config: { damping: 25 } });
 
 	return (
-		<div style={{
-			...TEXT_STYLE,
-			fontSize: size,
-			color,
-			opacity,
-			transition: 'all 0.3s ease'
-		}}>
-			{text}
+		<AbsoluteFill style={{ backgroundColor: COLORS.bg, overflow: 'hidden' }}>
+			<div
+				style={{
+					position: 'absolute',
+					width: '150%',
+					height: '150%',
+					top: '-25%',
+					left: '-25%',
+					background: `radial-gradient(circle at ${50 + move1 * 20}% ${50 + move2 * 20}%, ${COLORS.primary}44 0%, transparent 50%),
+								radial-gradient(circle at ${20 - move2 * 10}% ${80 + move1 * 10}%, ${COLORS.secondary}33 0%, transparent 50%)`,
+					filter: 'blur(80px)',
+					zIndex: -1,
+				}}
+			/>
+		</AbsoluteFill>
+	);
+};
+
+const GlassCard: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }> = ({ children, style }) => (
+	<div
+		style={{
+			backgroundColor: COLORS.glass,
+			backdropFilter: 'blur(12px)',
+			border: `1px solid ${COLORS.glassBorder}`,
+			borderRadius: '24px',
+			padding: '30px',
+			boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+			...style,
+		}}
+	>
+		{children}
+	</div>
+);
+
+const TypingText: React.FC<{ text: string; delay?: number; speed?: number; color?: string; size?: number }> = ({
+	text,
+	delay = 0,
+	speed = 2,
+	color = COLORS.text,
+	size = 40,
+}) => {
+	const frame = useCurrentFrame();
+	const currentText = text.slice(0, Math.max(0, Math.floor((frame - delay) / speed)));
+
+	return (
+		<div style={{ ...TEXT_STYLE, fontSize: size, color, fontFamily: 'monospace' }}>
+			{currentText}
+			<span style={{ opacity: (frame - delay) % (speed * 2) === 0 ? 1 : 0 }}>|</span>
 		</div>
 	);
 };
+
+const Scene: React.FC<{ startFrame: number; endFrame: number; children: React.ReactNode }> = ({
+	startFrame,
+	endFrame,
+	children,
+}) => {
+	const frame = useCurrentFrame();
+	if (frame < startFrame || frame > endFrame) return null;
+
+	const opacity = interpolate(frame - startFrame, [0, 15], [0, 1], { extrapolateRight: 'clamp' });
+	const scale = interpolate(frame - startFrame, [0, 15], [0.95, 1], { extrapolateRight: 'clamp' });
+
+	return (
+		<AbsoluteFill style={{ opacity, transform: `scale(${scale})`, justifyContent: 'center', alignItems: 'center' }}>
+			{children}
+		</AbsoluteFill>
+	);
+};
+
+// --- Main Video ---
 
 export const StackShieldVideo: React.FC = () => {
 	const frame = useCurrentFrame();
 	const { fps } = useVideoConfig();
 
+	// Assets from the provided folder
+	const scanImages = [
+		'/assets/Image 04-09-2026 at 5.16 PM.png',
+		'/assets/Image 04-09-2026 at 5.17 PM.png',
+		'/assets/Image 04-09-2026 at 5.17 PM (1).png',
+		'/assets/Image 04-09-2026 at 5.17 PM (2).png',
+		'/assets/Image 04-09-2026 at 5.17 PM (3).png',
+		'/assets/Image 04-09-2026 at 5.25 PM.png',
+		'/assets/Image 04-09-2026 at 5.26 PM.png',
+		'/assets/Image 04-09-2026 at 5.27 PM.png',
+		'/assets/Image 04-09-2026 at 5.28 PM.png',
+		'/assets/Image 04-09-2026 at 5.29 PM.png',
+	];
+
 	return (
 		<AbsoluteFill style={{ backgroundColor: COLORS.bg }}>
-			{/* Scene 1: The Vibe-Coding Hook (0-90 frames) */}
+			<MeshBackground />
+
+			{/* Scene 1: Hook */}
 			<Scene startFrame={0} endFrame={90}>
-				<AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-					<FadeInText text="You're shipping at light speed..." size={70} />
-					<div style={{ height: 100 }} />
-					<FadeInText text="But is your security keeping up?" size={60} color={COLORS.primary} delay={30} />
-				</AbsoluteFill>
+				<div style={{ textAlign: 'center' }}>
+					<h1 style={{ ...TEXT_STYLE, fontSize: 80, marginBottom: 20 }}>Shipping at light speed?</h1>
+					<p style={{ ...TEXT_STYLE, fontSize: 40, color: COLORS.primary }}>Is your security keeping up?</p>
+				</div>
 			</Scene>
 
-			{/* Scene 2: The Pain Point (90-180 frames) */}
+			{/* Scene 2: Problem */}
 			<Scene startFrame={90} endFrame={180}>
-				<AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a0a0a' }}>
-					<div style={{
-						display: 'flex',
-						gap: '40px',
-						opacity: interpolate(frame, [90, 110], [0, 1], { extrapolateRight: 'clamp' })
-					}}>
-						<div style={{ ...TEXT_STYLE, color: COLORS.danger, fontSize: 50 }}>⚠️ Leaked Keys</div>
-						<div style={{ ...TEXT_STYLE, color: COLORS.danger, fontSize: 50 }}>⚠️ Broken RLS</div>
-						<div style={{ ...TEXT_STYLE, color: COLORS.danger, fontSize: 50 }}>⚠️ Open CORS</div>
-					</div>
-					<div style={{ height: 100 }} />
-					<FadeInText text="Stop guessing. Start securing." size={70} delay={120} />
-				</AbsoluteFill>
+				<div style={{ display: 'flex', flexDirection: 'column', gap: 30, width: '80%' }}>
+					{['Leaked Keys', 'Broken RLS', 'Open CORS'].map((text, i) => (
+						<GlassCard
+							key={text}
+							style={{
+								opacity: interpolate(frame, [90 + i * 15, 90 + i * 15 + 15], [0, 1], { extrapolateRight: 'clamp' }),
+								transform: `translateY(${interpolate(frame, [90 + i * 15, 90 + i * 15 + 15], [20, 0], { extrapolateRight: 'clamp' })}px)`,
+								borderLeft: `8px solid ${COLORS.danger}`,
+							}}
+						>
+							<div style={{ ...TEXT_STYLE, fontSize: 40, color: COLORS.danger }}>⚠️ {text}</div>
+						</GlassCard>
+					))}
+				</div>
 			</Scene>
 
-			{/* Scene 3: The Hero - StackShield (180-270 frames) */}
+			{/* Scene 3: Solution */}
 			<Scene startFrame={180} endFrame={270}>
-				<AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-					<div style={{
-						fontSize: 150,
-						...TEXT_STYLE,
-						color: COLORS.primary,
-						transform: `scale(${spring({ frame: frame - 180, fps, config: { damping: 10 } })})`,
-						opacity: interpolate(frame, [180, 200], [0, 1], { extrapolateRight: 'clamp' })
-					}}>
+				<div style={{ textAlign: 'center' }}>
+					<div
+						style={{
+							fontSize: 160,
+							...TEXT_STYLE,
+							color: COLORS.primary,
+							transform: `scale(${spring({ frame: frame - 180, fps, config: { damping: 12 } })})`,
+						}}
+					>
 						StackShield
 					</div>
-					<FadeInText text="Pre-launch security for vibe-coded apps" size={40} delay={210} />
-				</AbsoluteFill>
+					<p style={{ ...TEXT_STYLE, fontSize: 40, opacity: interpolate(frame, [210, 230], [0, 1], { extrapolateRight: 'clamp' }) }}>
+						Pre-launch security for vibe-coded apps
+					</p>
+				</div>
 			</Scene>
 
-			{/* Scene 4: The Magic/Features (270-390 frames) */}
-			<Scene startFrame={270} endFrame={390}>
-				<AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-					<div style={{
-						display: 'grid',
-						gridTemplateColumns: '1fr',
-						gap: '50px',
-						width: '80%',
-						opacity: interpolate(frame, [270, 290], [0, 1], { extrapolateRight: 'clamp' })
-					}}>
-						<div style={{ ...TEXT_STYLE, fontSize: 40, border: `2px solid ${COLORS.primary}`, padding: '20px', borderRadius: '15px' }}>
-							Supabase RLS Audit
+			{/* Scene 4: The User Flow - Claude Code Interaction */}
+			<Scene startFrame={270} endFrame={450}>
+				<div
+					style={{
+						width: '90%',
+						transform: `scale(${interpolate(frame, [320, 380], [1, 1.4], { extrapolateRight: 'clamp' })})`,
+						transition: 'transform 0.1s linear',
+					}}
+				>
+					<GlassCard style={{ backgroundColor: '#000', border: `1px solid ${COLORS.primary}44` }}>
+						<div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+							<div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#ff5f56' }} />
+							<div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#ffbd2e' }} />
+							<div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#27c93f' }} />
 						</div>
-						<div style={{ ...TEXT_STYLE, fontSize: 40, border: `2px solid ${COLORS.primary}`, padding: '20px', borderRadius: '15px' }}>
-							GitHub Secrets Sweep
+						<div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
+							<div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+								<span style={{ color: COLORS.primary, fontFamily: 'monospace', fontWeight: 'bold' }}>➜</span>
+								<TypingText text="scan my project connected to StackShield" delay={280} speed={2} size={30} />
+							</div>
+							<div
+								style={{
+									opacity: interpolate(frame, [360, 380], [0, 1], { extrapolateRight: 'clamp' }),
+									color: COLORS.accent,
+									fontFamily: 'monospace',
+									fontSize: 24,
+								}}
+							>
+								Executing MCP Tool: stackshield_scan...
+							</div>
 						</div>
-						<div style={{ ...TEXT_STYLE, fontSize: 40, border: `2px solid ${COLORS.primary}`, padding: '20px', borderRadius: '15px' }}>
-							Vercel Env Inspection
-						</div>
-					</div>
-					<div style={{ height: 150 }} />
-					<FadeInText text="One-click scans. Total visibility." size={60} delay={320} />
-				</AbsoluteFill>
-			</Scene>
+					</GlassCard>
+				</div>
 
-			{/* Scene 5: The AI Fix (390-480 frames) */}
-			<Scene startFrame={390} endFrame={480}>
-				<AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-					<div style={{
-						backgroundColor: '#161625',
-						padding: '40px',
-						borderRadius: '20px',
-						border: `1px solid ${COLORS.secondary}`,
-						opacity: interpolate(frame, [390, 410], [0, 1], { extrapolateRight: 'clamp' })
-					}}>
-						<div style={{ ...TEXT_STYLE, fontSize: 30, color: COLORS.secondary, marginBottom: '20px' }}>AI-Powered Remediation</div>
-						<div style={{
-							backgroundColor: '#000',
-							padding: '20px',
-							borderRadius: '10px',
-							fontFamily: 'monospace',
-							color: COLORS.success,
-							fontSize: 24
-						}}>
-							{frame < 430 ? 'Analyzing vulnerability...' : '✅ Fix applied successfully!'}
-						</div>
-					</div>
-					<div style={{ height: 100 }} />
-					<FadeInText text="Fixed in seconds, not hours." size={60} delay={440} />
-				</AbsoluteFill>
-			</Scene>
-
-			{/* Scene 6: Trust/Confidence (480-550 frames) */}
-			<Scene startFrame={480} endFrame={550}>
-				<AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-					<div style={{
-						width: '300px',
-						height: '300px',
-						borderRadius: '50%',
-						border: `10px solid ${COLORS.success}`,
-						display: 'flex',
+				{/* Transition to Results */}
+				<div
+					style={{
+						position: 'absolute',
+						width: '100%',
+						height: '100%',
+						opacity: interpolate(frame, [390, 410], [0, 1], { extrapolateRight: 'clamp' }),
+						pointerEvents: 'none',
+						zIndex: 10,
 						justifyContent: 'center',
 						alignItems: 'center',
-						opacity: interpolate(frame, [480, 500], [0, 1], { extrapolateRight: 'clamp' })
-					}}>
-						<div style={{ ...TEXT_STYLE, fontSize: 50 }}>READY</div>
+						display: 'flex',
+					}}
+				>
+					<div
+						style={{
+							width: '80%',
+							height: '60%',
+							position: 'relative',
+							transform: `scale(${interpolate(frame, [390, 420], [0.8, 1], { extrapolateRight: 'clamp' })})`,
+						}}
+					>
+						{scanImages.map((img, i) => (
+							<img
+								key={img}
+								src={img}
+								style={{
+									position: 'absolute',
+									width: '100%',
+									height: '100%',
+									objectFit: 'contain',
+									opacity: interpolate(frame, [410 + i * 10, 410 + i * 10 + 10], [0, 1], { extrapolateRight: 'clamp' }),
+									filter: 'drop-shadow(0 0 20px rgba(0, 210, 255, 0.3))',
+								}}
+								alt={`Scan Result ${i}`}
+							/>
+						))}
 					</div>
-					<div style={{ height: 100 }} />
-					<FadeInText text="Ship with absolute confidence." size={70} delay={510} />
-				</AbsoluteFill>
+				</div>
 			</Scene>
 
-			{/* Scene 7: CTA (550-600 frames) */}
-			<Scene startFrame={550} endFrame={600}>
-				<AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-					<div style={{ ...TEXT_STYLE, fontSize: 80, color: COLORS.primary }}>stackshield.org</div>
-					<div style={{ height: 50 }} />
-					<FadeInText text="Secure your stack today." size={40} delay={560} />
-				</AbsoluteFill>
+			{/* Scene 5: AI Remediation */}
+			<Scene startFrame={450} endFrame={540}>
+				<GlassCard style={{ width: '80%', borderLeft: `8px solid ${COLORS.secondary}` }}>
+					<div style={{ ...TEXT_STYLE, fontSize: 30, color: COLORS.secondary, marginBottom: 20 }}>
+						AI-Powered Remediation
+					</div>
+					<div
+						style={{
+							backgroundColor: '#000',
+							padding: '20px',
+							borderRadius: '12px',
+							fontFamily: 'monospace',
+							color: COLORS.accent,
+							fontSize: 20,
+							textAlign: 'left',
+						}}
+					>
+						<TypingText text="Analyzing vulnerability..." delay={460} speed={3} size={20} />
+						<div style={{ opacity: interpolate(frame, [490, 510], [0, 1], { extrapolateRight: 'clamp' }) }}>
+							<div style={{ marginTop: 10 }}>✅ Fixed: Supabase RLS policy updated.</div>
+							<div style={{ marginTop: 5 }}>✅ Fixed: Vercel env variable secured.</div>
+						</div>
+					</div>
+				</GlassCard>
+			</Scene>
+
+			{/* Scene 6: CTA */}
+			<Scene startFrame={540} endFrame={600}>
+				<div style={{ textAlign: 'center' }}>
+					<div
+						style={{
+							fontSize: 100,
+							...TEXT_STYLE,
+							color: COLORS.primary,
+							transform: `scale(${spring({ frame: frame - 540, fps, config: { damping: 10 } })})`,
+						}}
+					>
+						stackshield.org
+					</div>
+					<p style={{ ...TEXT_STYLE, fontSize: 40, opacity: interpolate(frame, [560, 580], [0, 1], { extrapolateRight: 'clamp' }) }}>
+						Secure your stack today.
+					</p>
+				</div>
 			</Scene>
 		</AbsoluteFill>
 	);
